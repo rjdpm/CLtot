@@ -37,17 +37,13 @@ __all__ = ['PredMol2Vec',
            'PredChemBert',
            'PredFusionNet',
            
-           'predict_cltot_mol2vec',
-           'predict_cltot_feat',
-           'predict_cltot_gcn',
-           'predict_cltot_bert',
            'predict_cltot_FusionNet',
            
            'predict_cltot',
            ]
 
 path_1 = os.path.dirname(os.path.abspath(__file__))
-GLOBAL_PATH_INIT = f'{path_1}/Best_models'
+GLOBAL_PATH_INIT = f'{path_1}/Best_models_CLtot'
 
 def _round(x, decimal):
     if isinstance(x, (str, float, int)):
@@ -66,12 +62,7 @@ def _format_prediction(pred):
 class PredMol2Vec:
     
     mol2vec_model_path  = f'{GLOBAL_PATH_INIT}/Mol2Vec/repr_model/model_300dim.pkl'
-    rf_model_path       = f'{GLOBAL_PATH_INIT}/Mol2Vec/regressors/mol2vec_rf_best_model.pkl'
-    svm_model_path      = f'{GLOBAL_PATH_INIT}/Mol2Vec/regressors/mol2vec_svm_best_model.pkl'
-    xgb_model_path      = f'{GLOBAL_PATH_INIT}/Mol2Vec/regressors/mol2vec_xgb_best_model.pkl'
-    nn_model_path       = f'{GLOBAL_PATH_INIT}/Mol2Vec/regressors/mol2vec_nn_best_model.pt'
     scaler_path_feats   = f'{GLOBAL_PATH_INIT}/Mol2Vec/regressors/StandardScaler_feats.pkl'
-    scaler_path_labels  = f'{GLOBAL_PATH_INIT}/Mol2Vec/regressors/StandardScaler_labels.pkl'
 
     def __init__(self,
                  smiles: str,
@@ -85,7 +76,6 @@ class PredMol2Vec:
         self.mol2vec_model_path = mol2vec_model_path
         self.mol2vec_model = word2vec.Word2Vec.load(self.mol2vec_model_path)
         self.scaler_feats = load_from_pickle(self.scaler_path_feats)
-        self.scaler_labels = load_from_pickle(self.scaler_path_labels)
         if isinstance(self.smiles, str):
             self.preprocessing()
         if isinstance(self.smiles, (list, tuple)):
@@ -121,72 +111,12 @@ class PredMol2Vec:
         self.X = self.scaler_feats.transform(vec)
         
         return self.X
-        
-    def predict_mol2vec_nonNN(self, model_path):
-        
-        model = load_from_pickle(model_path)
-        pred_scaled = model.predict(self.X).reshape(-1, 1)
-        pred = self.scaler_labels.inverse_transform(pred_scaled)
-        pred = _format_prediction(pred)
-        
-        return pred
-
-    def predict_mol2vec_nn(self, model_path=nn_model_path):
-        nn_model = SMILESLinearNet(list_dims=[300, 256, 128, 1],
-                                   dropout=0.4,
-                                   act_func='relu',
-                                   norm_type='layer')
-        
-        Trainer_functions.load_test_network(network=nn_model, temp_network_path=model_path, verbose=False)
-        nn_model.eval()
-
-        with torch.no_grad():
-            pred_scaled = nn_model(torch.from_numpy(self.X).float()).reshape(-1, 1)
-        
-        pred = self.scaler_labels.inverse_transform(pred_scaled)
-        pred = _format_prediction(pred)
-        
-        return pred
-
-    # -------------------- Dispatcher -------------------- #
-
-    def predict(self):
-        if self.regressor == 'nn':
-            return self.predict_mol2vec_nn(self.nn_model_path)
-        elif self.regressor == 'xgb':
-            return self.predict_mol2vec_nonNN(self.xgb_model_path)
-        elif self.regressor == 'rf':
-            return self.predict_mol2vec_nonNN(self.rf_model_path)
-        elif self.regressor == 'svm':
-            return self.predict_mol2vec_nonNN(self.svm_model_path)
-        elif self.regressor == 'all':
-            y_pred_nn = self.predict_mol2vec_nn(self.nn_model_path)
-            y_pred_rf = self.predict_mol2vec_nonNN(self.rf_model_path)
-            y_pred_svm = self.predict_mol2vec_nonNN(self.svm_model_path)
-            y_pred_xgb = self.predict_mol2vec_nonNN(self.xgb_model_path)
-            return {'NN':y_pred_nn, 'RF':y_pred_rf, 'SVM':y_pred_svm, 'XGB':y_pred_xgb}
-        else:
-            raise ValueError(
-                f"Unknown regressor: {self.regressor}. "
-                f"Choose from 'nn', 'xgb', 'rf', 'svm'."
-            )
-def predict_cltot_mol2vec(smiles: str, regressor: str):
-    
-    obj = PredMol2Vec(smiles, regressor)
-    prediction = obj.predict()
-    
-    return prediction
 
 
 class PredDescriptors:
     
     features_path       = f'{GLOBAL_PATH_INIT}/Descriptors/repr_model/optimal_features.json'
     scaler_path_feats   = f'{GLOBAL_PATH_INIT}/Descriptors/regressors/StandardScaler_feats.pkl'
-    scaler_path_labels  = f'{GLOBAL_PATH_INIT}/Descriptors/regressors/StandardScaler_labels.pkl'
-    rf_model_path       = f'{GLOBAL_PATH_INIT}/Descriptors/regressors/feat_rf_best_model.pkl'
-    svm_model_path      = f'{GLOBAL_PATH_INIT}/Descriptors/regressors/feat_svm_best_model.pkl'
-    xgb_model_path      = f'{GLOBAL_PATH_INIT}/Descriptors/regressors/feat_xgb_best_model.pkl'
-    nn_model_path       = f'{GLOBAL_PATH_INIT}/Descriptors/regressors/feat_nn_best_model.pt'
     
     def __init__(self,
                  smiles: str,
@@ -195,7 +125,6 @@ class PredDescriptors:
         self.smiles = smiles
         self.regressor = regressor
         self.scaler_feats = load_from_pickle(self.scaler_path_feats)
-        self.scaler_labels = load_from_pickle(self.scaler_path_labels)
         self.features = load_json(self.features_path)
         if isinstance(self.smiles, str):
             self.preprocessing()
@@ -221,70 +150,10 @@ class PredDescriptors:
         
         return self.X
         
-    def predict_feat_nonNN(self, model_path):
-        
-        model = load_from_pickle(model_path)
-        pred_scaled = model.predict(self.X).reshape(-1, 1)
-        pred = self.scaler_labels.inverse_transform(pred_scaled)
-        pred = _format_prediction(pred)
-        
-        return pred
-        
-
-    def predict_feat_nn(self, model_path=nn_model_path):
-        
-        nn_model = SMILESLinearNet(list_dims=[91, 512, 512, 1],
-                                   dropout=0.2,
-                                   act_func='relu',
-                                   norm_type='layer')
-        Trainer_functions.load_test_network(network=nn_model, temp_network_path=model_path, verbose=False)
-        nn_model.eval()
-
-        with torch.no_grad():
-            pred_scaled = nn_model(torch.from_numpy(self.X).float()).reshape(-1, 1)
-        pred = self.scaler_labels.inverse_transform(pred_scaled)
-        pred = _format_prediction(pred)
-        
-        return pred
-    
-    def predict(self):
-        
-        if self.regressor == 'nn':
-            return self.predict_feat_nn(self.nn_model_path)
-        elif self.regressor == 'xgb':
-            return self.predict_feat_nonNN(self.xgb_model_path)
-        elif self.regressor == 'rf':
-            return self.predict_feat_nonNN(self.rf_model_path)
-        elif self.regressor == 'svm':
-            return self.predict_feat_nonNN(self.svm_model_path)
-        elif self.regressor == 'all':
-            y_pred_nn = self.predict_feat_nn(self.nn_model_path)
-            y_pred_rf = self.predict_feat_nonNN(self.rf_model_path)
-            y_pred_svm = self.predict_feat_nonNN(self.svm_model_path)
-            y_pred_xgb = self.predict_feat_nonNN(self.xgb_model_path)
-            return {'NN':y_pred_nn, 'RF':y_pred_rf, 'SVM':y_pred_svm, 'XGB':y_pred_xgb}
-        else:
-            raise ValueError(
-                f"Unknown regressor: {self.regressor}. "
-                f"Choose from 'nn', 'xgb', 'rf', 'svm'."
-            )
-    
-def predict_cltot_feat(smiles: str, regressor: str):
-    
-    obj = PredDescriptors(smiles, regressor)
-    prediction = obj.predict()
-    
-    return prediction
 
 class PredGCN:
     
     scaler_path_feats   = f'{GLOBAL_PATH_INIT}/GCN/regressors/StandardScaler_feats.pkl'
-    scaler_path_labels  = f'{GLOBAL_PATH_INIT}/GCN/regressors/StandardScaler_labels.pkl'
-    
-    rf_model_path       = f'{GLOBAL_PATH_INIT}/GCN/regressors/gcn_rf_best_model.pkl'
-    svm_model_path      = f'{GLOBAL_PATH_INIT}/GCN/regressors/gcn_svm_best_model.pkl'
-    xgb_model_path      = f'{GLOBAL_PATH_INIT}/GCN/regressors/gcn_xgb_best_model.pkl'
-    nn_model_path       = f'{GLOBAL_PATH_INIT}/GCN/regressors/gcn_nn_best_model.pt'
     
     mol_details_path    = f'{GLOBAL_PATH_INIT}/GCN/repr_model/Dataset_atoms_maxatoms_hybds_chityp_bndlst.json'
     mean_path           = f'{GLOBAL_PATH_INIT}/GCN/repr_model/dataset_mean.pkl'
@@ -299,7 +168,6 @@ class PredGCN:
         self.smiles = smiles
         self.regressor = regressor
         self.scaler_feats = load_from_pickle(self.scaler_path_feats)
-        self.scaler_labels = load_from_pickle(self.scaler_path_labels)
         self.mol_details = load_json(self.mol_details_path)
         self.dataset_mean = load_from_pickle(self.mean_path)
         self.dataset_std = load_from_pickle(self.std_path)
@@ -359,73 +227,11 @@ class PredGCN:
          
         return self.X
         
-    def predict_gcn_nonNN(self, model_path):
-        
-        model = load_from_pickle(model_path)
-        pred_scaled = model.predict(self.X).reshape(-1, 1)
-        pred = self.scaler_labels.inverse_transform(pred_scaled)
-        pred = _format_prediction(pred)
-        
-        return pred
-
-    def predict_gcn_nn(self, model_path):
-        
-        nn_model = SMILESLinearNet(list_dims=[256, 171, 86, 1],
-                                   dropout=0.3,
-                                   act_func='relu',
-                                   norm_type='layer'
-                                   )
-        Trainer_functions.load_test_network(network=nn_model, temp_network_path=model_path, verbose=False)
-        nn_model.eval()
-
-        with torch.no_grad():
-            pred_scaled = nn_model(torch.from_numpy(self.X).float()).reshape(-1, 1)
-        pred = self.scaler_labels.inverse_transform(pred_scaled)
-        pred = _format_prediction(pred)
-        
-        return pred
-    
-    def predict(self):
-        
-        if self.regressor == 'nn':
-            return self.predict_gcn_nn(self.nn_model_path)
-        elif self.regressor == 'xgb':
-            return self.predict_gcn_nonNN(self.xgb_model_path)
-        elif self.regressor == 'rf':
-            return self.predict_gcn_nonNN(self.rf_model_path)
-        elif self.regressor == 'svm':
-            return self.predict_gcn_nonNN(self.svm_model_path)
-        elif self.regressor == 'all':
-            y_pred_nn = self.predict_gcn_nn(self.nn_model_path)
-            y_pred_rf = self.predict_gcn_nonNN(self.rf_model_path)
-            y_pred_svm = self.predict_gcn_nonNN(self.svm_model_path)
-            y_pred_xgb = self.predict_gcn_nonNN(self.xgb_model_path)
-            return {'NN':y_pred_nn, 'RF':y_pred_rf, 'SVM':y_pred_svm, 'XGB':y_pred_xgb}
-        else:
-            raise ValueError(
-                f"Unknown regressor: {self.regressor}. "
-                f"Choose from 'nn', 'xgb', 'rf', 'svm'."
-            )
-    
-def predict_cltot_gcn(smiles: str, regressor: str):
-    
-    obj = PredGCN(smiles, regressor)
-    prediction = obj.predict()
-    
-    return prediction
-
-
 class PredChemBert:
     
     repr_model_path     = f'{GLOBAL_PATH_INIT}/ChemBert/repr_model/bert_repr_best_model.pt'
     scaler_path_feats   = f'{GLOBAL_PATH_INIT}/ChemBert/regressors/StandardScaler_feats.pkl'
-    scaler_path_labels  = f'{GLOBAL_PATH_INIT}/ChemBert/regressors/StandardScaler_labels.pkl'
 
-    rf_model_path       = f'{GLOBAL_PATH_INIT}/ChemBert/regressors/bert_rf_best_model.pkl'
-    svm_model_path      = f'{GLOBAL_PATH_INIT}/ChemBert/regressors/bert_svm_best_model.pkl'
-    xgb_model_path      = f'{GLOBAL_PATH_INIT}/ChemBert/regressors/bert_xgb_best_model.pkl'
-    nn_model_path       = f'{GLOBAL_PATH_INIT}/ChemBert/regressors/bert_nn_best_model.pt'
-    
     def __init__(self,
                  smiles: str,
                  regressor: str='None'
@@ -434,7 +240,6 @@ class PredChemBert:
         self.regressor = regressor
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.scaler_feats = load_from_pickle(self.scaler_path_feats)
-        self.scaler_labels = load_from_pickle(self.scaler_path_labels)
         self.MODEL_NAME = "DeepChem/ChemBERTa-77M-MLM"
         self.TOKENIZER = AutoTokenizer.from_pretrained(self.MODEL_NAME)
         self.repr_model = ChemBERTaRegressor(model_name='DeepChem/ChemBERTa-77M-MLM',
@@ -475,62 +280,6 @@ class PredChemBert:
         
         return self.X
         
-    def predict_bert_nonNN(self, model_path):
-        
-        model = load_from_pickle(model_path)
-        pred_scaled = model.predict(self.X).reshape(-1, 1)
-        pred = self.scaler_labels.inverse_transform(pred_scaled)
-        pred = _format_prediction(pred)
-        
-        return pred
-
-    def predict_bert_nn(self, model_path=nn_model_path):
-        
-        nn_model = SMILESLinearNet(list_dims=[384, 256, 128, 1],
-                                   dropout=0.5,
-                                   act_func='relu',
-                                   norm_type='layer'
-                                   )
-        Trainer_functions.load_test_network(network=nn_model, temp_network_path=model_path, verbose=False)
-        nn_model.eval()
-
-        with torch.no_grad():
-            pred_scaled = nn_model(torch.from_numpy(self.X).float()).reshape(-1, 1)
-        pred = self.scaler_labels.inverse_transform(pred_scaled)
-        pred = _format_prediction(pred)
-        
-        return pred
-    
-    def predict(self):
-        
-        if self.regressor == 'nn':
-            return self.predict_bert_nn(self.nn_model_path)
-        elif self.regressor == 'xgb':
-            return self.predict_bert_nonNN(self.xgb_model_path)
-        elif self.regressor == 'rf':
-            return self.predict_bert_nonNN(self.rf_model_path)
-        elif self.regressor == 'svm':
-            return self.predict_bert_nonNN(self.svm_model_path)
-        elif self.regressor == 'all':
-            y_pred_nn = self.predict_bert_nn(self.nn_model_path)
-            y_pred_rf = self.predict_bert_nonNN(self.rf_model_path)
-            y_pred_svm = self.predict_bert_nonNN(self.svm_model_path)
-            y_pred_xgb = self.predict_bert_nonNN(self.xgb_model_path)
-            return {'NN':y_pred_nn, 'RF':y_pred_rf, 'SVM':y_pred_svm, 'XGB':y_pred_xgb}
-        else:
-            raise ValueError(
-                f"Unknown regressor: {self.regressor}. "
-                f"Choose from 'nn', 'xgb', 'rf', 'svm'."
-            )
-    
-def predict_cltot_bert(smiles: str, regressor: str):
-    
-    obj = PredChemBert(smiles, regressor)
-    prediction = obj.predict()
-    
-    return prediction
-
-
 class PredFusionNet:
     
     scaler_path_feats   = f'{GLOBAL_PATH_INIT}/Fused_model/regressors/StandardScaler_feats.pkl'
@@ -684,12 +433,7 @@ def predict_cltot(smiles, regressor='all', representation='FusionNet'):
     else:
         raise TypeError("smiles must be a string, pandas Series, list, or tuple")
 
-    predict_funcs = {'mol2vec': predict_cltot_mol2vec,
-                    'gcn': predict_cltot_gcn,
-                    'chembert': predict_cltot_bert,
-                    'descriptors': predict_cltot_feat,
-                    'FusionNet': predict_cltot_FusionNet
-                    }
+    predict_funcs = {'FusionNet': predict_cltot_FusionNet}
     representation = representation.strip()
     if representation not in predict_funcs:
         raise ValueError(f"Unknown representation: {representation}. Choose from {list(predict_funcs)}")

@@ -19,7 +19,7 @@ __all__ = [
 ]
 
 path_1 = os.path.dirname(os.path.abspath(__file__))
-GLOBAL_PATH_INIT = f'{path_1}/../Best_models/metadata'
+GLOBAL_PATH_INIT = f'{path_1}/../Best_models_CLtot/metadata'
 dict_path = f'{GLOBAL_PATH_INIT}/All_possible_atoms_X.pkl'
 
 with open(dict_path, 'rb') as fp:
