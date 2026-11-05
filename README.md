@@ -6,6 +6,7 @@
 1. [Requirements](#requirements)
 1. [Repository Outline](#repository-outline)
 1. [Usages](#usages)
+1. [Web-based Platform](#web-based-platform)
 1. [References](#references)
 
 ## Introduction
@@ -90,7 +91,7 @@ Please follow the steps one by one to predict the **Total Clearance** values of 
         y_pred = predict_cltot(smiles_list)
     ```
 
-## Web-based Software
+## Web-based Platform
 
 An web-based platform, [Teoreler](https://www.teoreler.com/mlpred/), has been developed and made freely available for molecular property prediction.
 
