@@ -95,7 +95,7 @@ Please follow the steps one by one to predict the **Total Clearance** values of 
 
 An web-based platform, [Teoreler](https://www.teoreler.com/mlpred/), has been developed and made freely available for molecular property prediction.
 
-<img src="teoreler_full.png" width="700">
+<img src="inference_utils_cltot/images/teoreler_full.png" width="700">
 
 ## References
 
