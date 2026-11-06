@@ -88,6 +88,26 @@ An web-based platform, [Teoreler](https://www.teoreler.com/mlpred/), has been de
 
 <img src="inference_utils_cltot/images/teoreler_full.png" width="700">
 
+### :computer: **How to Use?**
+
+- For single SMILES:
+    - Under the `Prediction Mode`, select  __Single__.
+    - Enter the SMILES in the designated input field.
+    - Click the Predict button to obtain the prediction.
+
+- For multiple SMILES:
+    - Under the `Prediction Mode`, select  __Batch__.
+    - Prepare the input file using either of the following methods:
+    - **Process - 1: Prepare Your Own File**
+        - Create a $.csv$ or $.xlsx$ file containing the SMILES notations.
+        - Ensure that the column containing the SMILES notations is named as **SMILES**.
+    - **Process - 2**
+        - Download the SMILES batch input [template](https://www.teoreler.com/templates/SMILES_batch_file.xlsx).
+        - Enter the SMILES in the corresponding column.
+
+    - Upload the prepared file using file upload option.
+    - Click the Predict button to initiate batch prediction.
+    
 ## :scroll: Citation
 
 Use the following format to cite this work.
