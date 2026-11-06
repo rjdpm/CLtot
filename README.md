@@ -70,16 +70,6 @@ Please follow the steps one by one to predict the **Total Clearance** values of 
 
 1. Run the following commands:
 
-    -  **For both single or multiple SMILES:**
-
-    ```python
-        from inference_cltot import predict_cltot
-
-        y_pred = predict_cltot(smiles)
-    ```
-
-1. **Example**
-
     ```python
         from inference_cltot import predict_cltot
 
