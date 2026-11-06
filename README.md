@@ -1,6 +1,7 @@
 # FoEnet: A Fusion of Expert network for Machine Learning-Based Total Clearance Prediction of Chemical Compounds
 
-## Table of Content
+## :bookmark_tabs: Table of Content
+
 1. [Introduction](#introduction)
 1. [Data Collection](#data-collection)
 1. [Requirements](#requirements)
@@ -9,7 +10,7 @@
 1. [Web-based Platform](#web-based-platform)
 1. [References](#references)
 
-## Introduction
+## :book: Introduction
 The Fusion-of-Expert network (FoEnet) integrates four complementary molecular information to predict the total clearnce value of chemical compounds.  These representations capture distinct aspects of molecular information, including molecular-level properties, substructure-level features, graph topology, and chemical language-based information. To extract these complementary representations, four corresponding computational approaches were employed, as summarised below.
 
 | Information | Representation |
@@ -19,7 +20,7 @@ The Fusion-of-Expert network (FoEnet) integrates four complementary molecular in
 | Graph Topology| [Multi-relational Graph Neural Network](https://ascpt.onlinelibrary.wiley.com/doi/10.1002/psp4.70305) |
 | Language-based | [Chemberta-2](https://huggingface.co/DeepChem/ChemBERTa-77M-MLM) |
 
-## Data Collection
+## :dna: Data Collection
 
 Six publicly available datasets were merged, and systematically filtered following the methods described in the `Data Collection` and `Data Preprocessing` sections in the main manuscript to construct the final dataset of 1763 chemical compounds. The data sources are summarised as follows:
 
@@ -32,7 +33,7 @@ Six publicly available datasets were merged, and systematically filtered followi
 | e-Drug3D (2024)| 1123 | [link](https://chemoinfo.ipmc.cnrs.fr/DOWNLOAD/MOLDB/e-Drug3D_2197_PK.txt) |
 | DrugBank (2024)| 1673 | [link](https://go.drugbank.com/docs/drugbank.xsd) |
 
-## Requirements
+## 	:gear: Requirements
 
 The following packages are required for the reproduciblity of the published code.
 
@@ -48,7 +49,7 @@ The following packages are required for the reproduciblity of the published code
 | Transformers | 4.57.1 | Xgboost | 3.0.2 |
 
 
-## Repository Outline
+## :open_file_folder: Repository Outline
 
 The repository is outlined as follows:
 
@@ -59,7 +60,7 @@ The repository is outlined as follows:
 | prediction.ipynb | Example uses |
 
 
-## Usages
+## :rocket: Usages
 
 Please follow the steps one by one to predict the **Total Clearance** values of any chemical compound.
 
@@ -91,13 +92,13 @@ Please follow the steps one by one to predict the **Total Clearance** values of 
         y_pred = predict_cltot(smiles_list)
     ```
 
-## Web-based Platform
+## :globe_with_meridians: Web-based Platform
 
 An web-based platform, [Teoreler](https://www.teoreler.com/mlpred/), has been developed and made freely available for molecular property prediction.
 
 <img src="inference_utils_cltot/images/teoreler_full.png" width="700">
 
-## References
+## :scroll: Citation
 
 Use the following format to cite this work.
 
