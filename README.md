@@ -88,7 +88,7 @@ An web-based platform, [Teoreler](https://www.teoreler.com/mlpred/), has been de
 
 <img src="inference_utils_cltot/images/teoreler_full.png" width="700">
 
-### :computer: **How to Use?**
+### :computer: **How to Use [Teoreler](https://www.teoreler.com/mlpred/)?**
 
 - For single SMILES:
 
@@ -101,7 +101,7 @@ An web-based platform, [Teoreler](https://www.teoreler.com/mlpred/), has been de
     - Under the `Prediction Mode`, select  __Batch__.
     - Prepare the input file using either of the following methods:
     - **Process - 1: Prepare Your Own File**
-    
+
         - Create a $.csv$ or $.xlsx$ file containing the SMILES notations.
         - Ensure that the column containing the SMILES notations is named as **SMILES**.
 
